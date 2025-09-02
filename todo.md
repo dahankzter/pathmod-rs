@@ -9,7 +9,7 @@
 - [x] Add unit tests covering get/get_mut/set/set_mut/set_clone and composed deep updates.
 - [x] Add trybuild UI tests for invalid derives (non-struct targets), generics bounds, and visibility diagnostics.
 - [x] Add an example demonstrating derive-based deep mutation via composed accessors.
-- Update README to present the derive-centric API, composition, and visibility rules.
+- [x] Update README to present the derive-centric API, composition, and visibility rules.
 - Set up CI (fmt, clippy -D warnings, tests including doctests) and enforce/document MSRV 1.89+.
 - Roadmap: implement minimal-clone reconstruction along the path with precise Clone bounds.
 - Roadmap: add indexing builders (e.g., acc_items_at(idx) -> Accessor<Self, Item>) for Vec/arrays.

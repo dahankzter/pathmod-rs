@@ -4,11 +4,10 @@ Pathmod
 Pathmod — derive tiny, composable accessors for ergonomic, type-safe deep mutation.
 
 Overview
-- Derive-first API: #[derive(Accessor)] generates tiny accessors for each field.
-- Compose accessors: Chain accessors to focus deeply nested fields without boilerplate.
-- Zero-copy projection: Accessors are Copy, represented as a byte offset from the root type to the field.
+- Derive-centric API: #[derive(Accessor)] generates tiny, const accessors for each field (named or tuple) as inherent pub methods on your type. Use the single pathmod crate (re-export) for a smooth UX.
+- Composition-first ergonomics: Chain accessors to focus deeply nested fields without boilerplate using Accessor::compose.
+- Zero-copy projection: Accessors are Copy and represented as a byte offset from the root type to the field; composition is O(1) offset addition.
 - Safe surface: All public APIs are safe; unsafe is contained inside the core crate.
-- Re-export crate: Use the single pathmod crate for a smooth user experience.
 
 Why? (Rationale)
 Rust encourages explicit ownership and borrowing, but it can be verbose to tunnel through nested structs just to tweak a leaf field. Pathmod gives you tiny, composable “field lenses” you can derive and chain:
@@ -151,6 +150,17 @@ fn main() {
 }
 ```
 
+Derive-centric API
+- Add #[derive(Accessor)] to your struct. For each field, the macro generates a pub const accessor method on the type.
+- Named fields: acc_<field>() -> Accessor<Self, FieldTy>
+- Tuple fields: acc_<index>() -> Accessor<Self, FieldTy>
+- Bring the API into scope with use pathmod::prelude::*.
+
+Composition
+- Compose accessors to focus deep fields: Accessor<T, U>.compose(Accessor<U, V>) -> Accessor<T, V>.
+- Composition is O(1) because accessors are just byte offsets; composing adds offsets.
+- You can keep and reuse composed accessors, e.g., let acc = A::acc_b().compose(B::acc_c());
+
 API sketch
 - Accessor<T, F>::get(&T) -> &F
 - Accessor<T, F>::get_mut(&mut T) -> &mut F
@@ -166,7 +176,11 @@ Design notes
 - Clone semantics (MVP): set_clone clones the provided &F and writes it into the field. Only F: Clone is required; T does not need Clone. This property holds through composition.
 
 Visibility
-- Generated accessor methods are inherent impls on your type and are always pub in the current MVP. Future versions may add visibility control.
+- The derive generates inherent accessor methods on your type: pub const fn acc_<field>() -> Accessor<Self, FieldTy> (or acc_<idx> for tuple fields).
+- These methods are pub on the impl block, but Rust’s normal visibility rules still apply:
+  - If the type itself is not visible, callers outside its module cannot reference it or its methods.
+  - If a field type is private to a module, you cannot name it from outside even if the accessor method exists.
+- Our UI tests include examples where calling an accessor on a private type from outside its module fails with the expected E0603 error.
 
 Limitations and roadmap
 - UI diagnostics for complex generics/visibility: planned.
