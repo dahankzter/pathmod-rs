@@ -17,8 +17,17 @@ pub struct Accessor<T, F> {
 impl<T, F> Accessor<T, F> {
     /// Construct from a precomputed byte offset.
     ///
-    /// Safety: `offset` must be the correct byte distance from `&T` to `&F`
-    /// within the same allocation for any valid instance of `T`.
+    /// # Safety
+    /// The `offset` must satisfy all of the following conditions for every valid instance of `T`:
+    /// - It is the exact byte distance from the start of `T` to the target field `F` within the
+    ///   same allocation (i.e., derived from an actual field projection of `T`).
+    /// - The resulting pointer computed as `(&T as *const u8).offset(offset) as *const F` is
+    ///   properly aligned for `F` and points to initialized memory owned by the same `T` object.
+    /// - The accessor will only ever be used with values of type `T` that have the same layout
+    ///   with respect to the field `F` (e.g., not a different type or transmuted layout).
+    ///
+    /// Violating any of these preconditions is undefined behavior. Prefer constructing accessors
+    /// via `#[derive(Accessor)]` or `Accessor::from_fns`, which compute valid offsets for you.
     pub const unsafe fn from_offset(offset: isize) -> Self {
         Self {
             offset,
