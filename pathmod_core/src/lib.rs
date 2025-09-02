@@ -1,4 +1,4 @@
-#![doc = "Core types for pathmod"]
+#![doc = "Core types for pathmod\n\nThis crate provides the runtime `Accessor<T, F>` type used by the derive macros in `pathmod_derive` and re-exported by the `pathmod` crate.\n\nClone requirements for set_clone (MVP):\n- `Accessor::set_clone(&mut T, &F)` clones the provided value at the top level and writes it into the focused field.\n- Only `F: Clone` is required. The root type `T` does not need to implement `Clone` for this operation.\n- When composing accessors (e.g., `Accessor<T, U>.compose(Accessor<U, V>)`), calling `set_clone` on the composed accessor still only requires `V: Clone`.\n\nSafety notes:\n- Internally, accessors are represented by a byte offset and use unsafe pointer arithmetic to project fields. The public API is safe when accessors are constructed by the provided derive macros or `from_fns`.\n"]
 
 use core::marker::PhantomData;
 
@@ -73,9 +73,12 @@ impl<T, F> Accessor<T, F> {
 
     /// Set by cloning the provided value into the focused location.
     ///
-    /// MVP semantics: the caller provides a shared reference to the value, and
-    /// we clone it at the top and move it into the field. This requires F: Clone
-    /// on the value type only; no Clone bound is required on T.
+    /// MVP semantics:
+    /// - The caller provides a shared reference to the value, and we perform a top-level
+    ///   `Clone` of that value, then move it into the field.
+    /// - Only `F: Clone` is required; the root type `T` does not need to implement `Clone`.
+    /// - This behavior composes: for a composed accessor focusing `T -> ... -> V`, calling
+    ///   `set_clone` only requires `V: Clone`.
     pub fn set_clone(&self, root: &mut T, value: &F)
     where
         F: Clone,
