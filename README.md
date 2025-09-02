@@ -201,7 +201,7 @@ Development
 Single-version policy and Release (tag-based, crates.io)
 - All crates in this workspace share a single version number that corresponds to the git tag (vX.Y.Z).
 - Tag-only flow (no local version bumping required):
-  1) Ensure the repository secret CRATES_IO_TOKEN is set in GitHub (from your crates.io account).
+  1) Ensure the repository secret CRATES_IO_TOKEN is set in GitHub (from your crates.io account). The workflow maps CRATES_IO_TOKEN to CARGO_REGISTRY_TOKEN for cargo publish.
   2) Create and push a tag vX.Y.Z (e.g., git tag v0.1.0 && git push origin v0.1.0).
   3) The Release workflow runs cargo-release, which sets all crate versions to X.Y.Z in CI and publishes in order: pathmod_derive -> pathmod_core -> pathmod.
 - Notes:
