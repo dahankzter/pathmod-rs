@@ -38,6 +38,37 @@ jobs:
       - name: Test (including doctests)
         run: cargo test --workspace --all-features --all-targets --verbose
 
+  # Coverage and Coveralls upload (run once on Linux stable)
+  coverage:
+    name: Coverage (Coveralls)
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.head_ref == ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install llvm-tools and cargo-llvm-cov
+        run: |
+          rustup component add llvm-tools-preview
+          cargo install cargo-llvm-cov || true
+
+      - name: Generate lcov.info
+        run: |
+          cargo llvm-cov clean --workspace
+          cargo llvm-cov --workspace --all-features --lcov --output-path lcov.info
+
+      - name: Upload to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: lcov.info
+          parallel: false
+
   # Optional: Minimal smoke on macOS and Windows (stable only)
   cross-os:
     name: Smoke build (macOS, Windows)

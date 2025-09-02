@@ -1,6 +1,8 @@
 Pathmod
 =======
 
+[![Coveralls](https://coveralls.io/repos/github/dahankzter/pathmod-rs/badge.svg?branch=main)](https://coveralls.io/github/dahankzter/pathmod-rs?branch=main)
+
 Pathmod — derive tiny, composable accessors for ergonomic, type-safe deep mutation.
 
 Overview
