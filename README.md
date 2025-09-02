@@ -180,5 +180,10 @@ Development
   - make coverage-summary  # prints text summary for all crates
   - make coverage          # generates HTML at target/llvm-cov/html/index.html
 
+Note about what appears in the coverage summary
+- The terminal table lists files that have executable coverage regions. Our pathmod crate is a thin re-export crate; its src/lib.rs only re-exports items, so it typically has 0 instrumentable lines and may not appear in the table.
+- We still run tests from the pathmod crate to validate the re-exported API and macro usage across crates; the executed code lives in pathmod_core (runtime) and pathmod_derive (macro expansion), so coverage is attributed to those crates’ source files.
+- If you want the re-export crate to show up explicitly in the table, add any small executable item (e.g., a trivial function) and a test calling it so it has at least one instrumented line.
+
 License
 Dual-licensed under MIT or Apache-2.0.
