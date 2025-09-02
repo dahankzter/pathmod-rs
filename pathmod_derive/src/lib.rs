@@ -119,7 +119,8 @@ fn expand_enum(input: DeriveInput) -> proc_macro2::TokenStream {
                         let fty = &fields.unnamed.first().unwrap().ty;
                         let is_fn = format_ident!("is_{}", v_ident.to_string().to_lowercase());
                         let as_fn = format_ident!("as_{}", v_ident.to_string().to_lowercase());
-                        let as_mut_fn = format_ident!("as_{}_mut", v_ident.to_string().to_lowercase());
+                        let as_mut_fn =
+                            format_ident!("as_{}_mut", v_ident.to_string().to_lowercase());
                         let set_fn = format_ident!("set_{}", v_ident.to_string().to_lowercase());
                         let map_fn = format_ident!("map_{}", v_ident.to_string().to_lowercase());
                         per_variant_tokens.push(quote! {
@@ -141,7 +142,9 @@ fn expand_enum(input: DeriveInput) -> proc_macro2::TokenStream {
                         break;
                     }
                     Fields::Unit => {
-                        error_msg = Some("#[derive(EnumAccess)] does not support unit variants in this MVP");
+                        error_msg = Some(
+                            "#[derive(EnumAccess)] does not support unit variants in this MVP",
+                        );
                         break;
                     }
                     _ => {
@@ -247,7 +250,10 @@ mod tests {
         let di: DeriveInput = parse_quote! { enum E { Both(i32, i32) } };
         let out = expand_enum(di);
         let s = out.to_string();
-        assert!(s.contains("compile_error") && s.contains("supports only tuple variants with exactly one field"));
+        assert!(
+            s.contains("compile_error")
+                && s.contains("supports only tuple variants with exactly one field")
+        );
     }
 
     #[test]
@@ -255,7 +261,9 @@ mod tests {
         let di: DeriveInput = parse_quote! { enum E { V { v: i32 } } };
         let out = expand_enum(di);
         let s = out.to_string();
-        assert!(s.contains("compile_error") && s.contains("currently supports only tuple variants"));
+        assert!(
+            s.contains("compile_error") && s.contains("currently supports only tuple variants")
+        );
     }
 
     #[test]

@@ -1,10 +1,15 @@
 use pathmod_core::{Accessor, Indexing};
 
 #[derive(Debug, PartialEq)]
-struct Simple { a: u8, b: i32 }
+struct Simple {
+    a: u8,
+    b: i32,
+}
 
 #[derive(Debug, PartialEq)]
-struct WithVec { items: Vec<i32> }
+struct WithVec {
+    items: Vec<i32>,
+}
 
 #[test]
 fn construct_with_from_offset_and_access() {
@@ -27,7 +32,9 @@ fn indexing_vec_get_mut_at_is_exercised() {
     let off = core::mem::offset_of!(WithVec, items) as isize;
     let acc_items: Accessor<WithVec, Vec<i32>> = unsafe { Accessor::from_offset(off) };
 
-    let mut w = WithVec { items: vec![10, 20, 30] };
+    let mut w = WithVec {
+        items: vec![10, 20, 30],
+    };
 
     // Read element at index 1 using get_at
     assert_eq!(*acc_items.get_at(&w, 1), 20);

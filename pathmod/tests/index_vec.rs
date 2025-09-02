@@ -12,7 +12,11 @@ struct Wrapper {
 
 #[test]
 fn index_into_vec_in_place_and_clone() {
-    let mut w = Wrapper { bag: Bag { items: vec![1, 2, 3] } };
+    let mut w = Wrapper {
+        bag: Bag {
+            items: vec![1, 2, 3],
+        },
+    };
 
     let acc_items = Wrapper::acc_bag().compose(Bag::acc_items());
 

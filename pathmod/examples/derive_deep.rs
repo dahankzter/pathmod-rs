@@ -2,30 +2,52 @@ use pathmod::prelude::*;
 
 // A small, realistic nested model
 #[derive(Accessor, Debug, PartialEq)]
-struct Address { city: String, zip: u32 }
+struct Address {
+    city: String,
+    zip: u32,
+}
 
 #[derive(Accessor, Debug, PartialEq)]
-struct Profile { address: Address, stats: Stats }
+struct Profile {
+    address: Address,
+    stats: Stats,
+}
 
 #[derive(Accessor, Debug, PartialEq)]
-struct Stats { logins: u32 }
+struct Stats {
+    logins: u32,
+}
 
 #[derive(Accessor, Debug, PartialEq)]
-struct User { profile: Profile, settings: Settings }
+struct User {
+    profile: Profile,
+    settings: Settings,
+}
 
 #[derive(Accessor, Debug, PartialEq)]
-struct Settings { theme: Theme }
+struct Settings {
+    theme: Theme,
+}
 
 #[derive(Accessor, Debug, PartialEq)]
-struct Theme { name: String }
+struct Theme {
+    name: String,
+}
 
 fn main() {
     let mut user = User {
         profile: Profile {
-            address: Address { city: "berlin".into(), zip: 10115 },
+            address: Address {
+                city: "berlin".into(),
+                zip: 10115,
+            },
             stats: Stats { logins: 1 },
         },
-        settings: Settings { theme: Theme { name: "light".into() } },
+        settings: Settings {
+            theme: Theme {
+                name: "light".into(),
+            },
+        },
     };
 
     // Compose a deep accessor: User -> Profile -> Address -> city

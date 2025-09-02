@@ -13,7 +13,10 @@ struct Bar {
 
 #[test]
 fn named_field_accessors_work() {
-    let mut foo = Foo { a: 1, b: Bar { x: 2 } };
+    let mut foo = Foo {
+        a: 1,
+        b: Bar { x: 2 },
+    };
 
     // Access direct field
     let acc_a = Foo::acc_a();

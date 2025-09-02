@@ -10,7 +10,7 @@ COV_DIR := target/llvm-cov
 HTML_INDEX := $(COV_DIR)/html/index.html
 LCOV_FILE := $(COV_DIR)/lcov.info
 
-.PHONY: clean test tests coverage coverage-html coverage-lcov coverage-summary coverage-clean coverage-open ensure-llvm-tools ensure-llvm-cov
+.PHONY: clean test tests format format-check coverage coverage-html coverage-lcov coverage-summary coverage-clean coverage-open ensure-llvm-tools ensure-llvm-cov
 
 # Run all tests across the workspace, including trybuild UI tests (proc-macro crate)
 # --all-targets includes unit, integration, and doctests.
@@ -42,6 +42,13 @@ coverage-lcov: ensure-llvm-tools ensure-llvm-cov
 # Remove coverage artifacts
 coverage-clean:
 	@rm -rf $(COV_DIR)
+
+# Formatting helpers
+format:
+	$(CARGO) fmt --all
+
+format-check:
+	$(CARGO) fmt --all -- --check
 
 # Clean the workspace (cargo clean) and coverage artifacts
 clean:

@@ -1,4 +1,3 @@
-
 // Trybuild-like negative tests by attempting to compile invalid derives in separate modules
 // and asserting they fail at compile time is not possible here; instead, we ensure the
 // successful paths are covered and we add a proc-macro crate tests to hit error arms.

@@ -20,7 +20,10 @@ impl<T, F> Accessor<T, F> {
     /// Safety: `offset` must be the correct byte distance from `&T` to `&F`
     /// within the same allocation for any valid instance of `T`.
     pub const unsafe fn from_offset(offset: isize) -> Self {
-        Self { offset, _phantom: PhantomData }
+        Self {
+            offset,
+            _phantom: PhantomData,
+        }
     }
 
     /// Runtime constructor from field-selection functions. Computes the offset

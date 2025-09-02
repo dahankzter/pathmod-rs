@@ -1,28 +1,42 @@
 use pathmod_core::Accessor;
 
 #[derive(Debug, PartialEq)]
-struct Inner { x: i32 }
+struct Inner {
+    x: i32,
+}
 
 #[derive(Debug, PartialEq)]
-struct Outer { inner: Inner }
+struct Outer {
+    inner: Inner,
+}
 
 // Helper field accessors constructed manually for tests.
 fn acc_inner() -> Accessor<Outer, Inner> {
-    fn get_ref(o: &Outer) -> &Inner { &o.inner }
-    fn get_mut(o: &mut Outer) -> &mut Inner { &mut o.inner }
+    fn get_ref(o: &Outer) -> &Inner {
+        &o.inner
+    }
+    fn get_mut(o: &mut Outer) -> &mut Inner {
+        &mut o.inner
+    }
     Accessor::from_fns(get_ref, get_mut)
 }
 
 fn acc_x() -> Accessor<Inner, i32> {
-    fn get_ref(i: &Inner) -> &i32 { &i.x }
-    fn get_mut(i: &mut Inner) -> &mut i32 { &mut i.x }
+    fn get_ref(i: &Inner) -> &i32 {
+        &i.x
+    }
+    fn get_mut(i: &mut Inner) -> &mut i32 {
+        &mut i.x
+    }
     Accessor::from_fns(get_ref, get_mut)
 }
 
 #[test]
 fn get_and_get_mut_work() {
     let a = acc_inner();
-    let o = Outer { inner: Inner { x: 7 } };
+    let o = Outer {
+        inner: Inner { x: 7 },
+    };
     assert_eq!(a.get(&o).x, 7);
 }
 
@@ -31,7 +45,9 @@ fn set_and_set_mut_and_set_clone_work() {
     let _a = acc_inner();
     let b = acc_x();
 
-    let mut o = Outer { inner: Inner { x: 0 } };
+    let mut o = Outer {
+        inner: Inner { x: 0 },
+    };
 
     // set via x accessor
     b.set(&mut o.inner, 5);
@@ -53,7 +69,9 @@ fn compose_and_deep_update_work() {
     let b = acc_x();
     let ab: Accessor<Outer, i32> = a.compose(b);
 
-    let mut o = Outer { inner: Inner { x: 1 } };
+    let mut o = Outer {
+        inner: Inner { x: 1 },
+    };
     assert_eq!(*ab.get(&o), 1);
 
     ab.set(&mut o, 10);
