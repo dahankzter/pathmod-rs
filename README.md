@@ -151,7 +151,9 @@ fn main() {
 ```
 
 Derive-centric API
-- Add #[derive(Accessor)] to your struct. For each field, the macro generates a pub const accessor method on the type.
+- Add #[derive(Accessor)] to your struct. For each field, the macro generates:
+  - pub const accessor methods on the type (acc_<field>() / acc_<index>()).
+  - reconstruction helpers: with_<field>(self, new: FieldTy) -> Self (or with_<index> for tuple fields) that consume self and return a new value with only that field replaced. These helpers move (not clone) other fields, enabling minimal-clone reconstruction.
 - Named fields: acc_<field>() -> Accessor<Self, FieldTy>
 - Tuple fields: acc_<index>() -> Accessor<Self, FieldTy>
 - Bring the API into scope with use pathmod::prelude::*.

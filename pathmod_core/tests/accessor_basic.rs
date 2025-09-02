@@ -28,7 +28,7 @@ fn get_and_get_mut_work() {
 
 #[test]
 fn set_and_set_mut_and_set_clone_work() {
-    let a = acc_inner();
+    let _a = acc_inner();
     let b = acc_x();
 
     let mut o = Outer { inner: Inner { x: 0 } };

@@ -10,7 +10,7 @@ fn expand(input: DeriveInput) -> proc_macro2::TokenStream {
     match input.data {
         Data::Struct(ref s) => match s.fields {
             Fields::Named(ref fields_named) => {
-                let fns = fields_named.named.iter().map(|f| {
+                let acc_fns = fields_named.named.iter().map(|f| {
                     let fname: &Ident = f.ident.as_ref().unwrap();
                     let acc_fn = format_ident!("acc_{}", fname);
                     let fty = &f.ty;
@@ -24,14 +24,32 @@ fn expand(input: DeriveInput) -> proc_macro2::TokenStream {
                     }
                 });
 
+                let with_fns = fields_named.named.iter().map(|f| {
+                    let fname: &Ident = f.ident.as_ref().unwrap();
+                    let with_fn = format_ident!("with_{}", fname);
+                    let fty = &f.ty;
+                    quote! {
+                        /// Return a new value with `#fname` replaced by `new_val`.
+                        ///
+                        /// This consumes `self` and reconstructs `Self` without cloning
+                        /// any other fields (they are moved). This is the building block
+                        /// for minimal-clone (actually zero-clone) reconstruction up the path.
+                        pub fn #with_fn(mut self, new_val: #fty) -> Self {
+                            self.#fname = new_val;
+                            self
+                        }
+                    }
+                });
+
                 quote! {
                     impl #impl_generics #ty_ident #ty_generics #where_clause {
-                        #(#fns)*
+                        #(#acc_fns)*
+                        #(#with_fns)*
                     }
                 }
             }
             Fields::Unnamed(ref fields_unnamed) => {
-                let fns = fields_unnamed.unnamed.iter().enumerate().map(|(i, f)| {
+                let acc_fns = fields_unnamed.unnamed.iter().enumerate().map(|(i, f)| {
                     let acc_fn = format_ident!("acc_{}", i);
                     let fty = &f.ty;
                     let index = syn::Index::from(i);
@@ -44,9 +62,24 @@ fn expand(input: DeriveInput) -> proc_macro2::TokenStream {
                         }
                     }
                 });
+                let with_fns = fields_unnamed.unnamed.iter().enumerate().map(|(i, f)| {
+                    let with_fn = format_ident!("with_{}", i);
+                    let fty = &f.ty;
+                    let index = syn::Index::from(i);
+                    quote! {
+                        /// Return a new value with tuple field at index #i replaced by `new_val`.
+                        ///
+                        /// Consumes `self` and reconstructs `Self` without cloning other fields.
+                        pub fn #with_fn(mut self, new_val: #fty) -> Self {
+                            self.#index = new_val;
+                            self
+                        }
+                    }
+                });
                 quote! {
                     impl #impl_generics #ty_ident #ty_generics #where_clause {
-                        #(#fns)*
+                        #(#acc_fns)*
+                        #(#with_fns)*
                     }
                 }
             }
