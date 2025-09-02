@@ -22,7 +22,7 @@ Crates in this workspace
 - pathmod_derive: Proc-macro derive that generates const accessors using core::mem::offset_of!.
 
 Minimum Supported Rust Version (MSRV)
-- Intended MSRV: 1.89+ (for core::mem::offset_of!). If your toolchain is older, update Rust.
+- MSRV: 1.89+ (required by core::mem::offset_of!). CI enforces building, linting, and testing on Rust 1.89.0 and stable.
 
 Quick start
 Add dependency (when published this will be on crates.io; in this repo use the workspace):
