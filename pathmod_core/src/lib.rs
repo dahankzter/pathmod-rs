@@ -97,6 +97,38 @@ impl<T, F> Accessor<T, F> {
     }
 }
 
+pub trait Indexing<T, E> {
+    fn get_at<'a>(&self, root: &'a T, idx: usize) -> &'a E;
+    fn get_mut_at<'a>(&self, root: &'a mut T, idx: usize) -> &'a mut E;
+    fn set_at(&self, root: &mut T, idx: usize, value: E);
+    fn set_mut_at(&self, root: &mut T, idx: usize, f: impl FnOnce(&mut E));
+    fn set_clone_at(&self, root: &mut T, idx: usize, value: &E)
+    where
+        E: Clone;
+}
+
+impl<T, E> Indexing<T, E> for Accessor<T, Vec<E>> {
+    fn get_at<'a>(&self, root: &'a T, idx: usize) -> &'a E {
+        &self.get(root)[idx]
+    }
+    fn get_mut_at<'a>(&self, root: &'a mut T, idx: usize) -> &'a mut E {
+        &mut self.get_mut(root)[idx]
+    }
+    fn set_at(&self, root: &mut T, idx: usize, value: E) {
+        self.get_mut(root)[idx] = value;
+    }
+    fn set_mut_at(&self, root: &mut T, idx: usize, f: impl FnOnce(&mut E)) {
+        f(&mut self.get_mut(root)[idx]);
+    }
+    fn set_clone_at(&self, root: &mut T, idx: usize, value: &E)
+    where
+        E: Clone,
+    {
+        self.get_mut(root)[idx] = value.clone();
+    }
+}
+
 pub mod prelude {
     pub use crate::Accessor;
+    pub use crate::Indexing;
 }
