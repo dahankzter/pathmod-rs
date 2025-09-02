@@ -1,6 +1,9 @@
 Pathmod crate
 ==============
 
+[![Crates.io](https://img.shields.io/crates/v/pathmod.svg)](https://crates.io/crates/pathmod)
+[![docs.rs](https://img.shields.io/docsrs/pathmod)](https://docs.rs/pathmod)
+
 Purpose
 - This is the user-facing, re-export crate for Pathmod. Depend on this crate in your application/library to use the derive and runtime with a single import path.
 - It re-exports:

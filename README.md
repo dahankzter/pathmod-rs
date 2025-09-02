@@ -1,6 +1,8 @@
 Pathmod
 =======
 
+[![Crates.io](https://img.shields.io/crates/v/pathmod.svg)](https://crates.io/crates/pathmod)
+[![docs.rs](https://img.shields.io/docsrs/pathmod)](https://docs.rs/pathmod)
 [![Coveralls](https://coveralls.io/repos/github/dahankzter/pathmod-rs/badge.svg?branch=main)](https://coveralls.io/github/dahankzter/pathmod-rs?branch=main)
 
 Pathmod — derive tiny, composable accessors for ergonomic, type-safe deep mutation.

@@ -1,6 +1,9 @@
 pathmod_core crate
 ==================
 
+[![Crates.io](https://img.shields.io/crates/v/pathmod_core.svg)](https://crates.io/crates/pathmod_core)
+[![docs.rs](https://img.shields.io/docsrs/pathmod_core)](https://docs.rs/pathmod_core)
+
 Purpose
 - Core runtime for Pathmod. Provides the Accessor<T, F> type and its safe methods for reading/mutating focused fields.
 - Used indirectly by most users via the re-export crate `pathmod`, but library authors may depend directly if they need only the runtime.

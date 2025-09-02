@@ -1,6 +1,9 @@
 pathmod_derive crate
 ====================
 
+[![Crates.io](https://img.shields.io/crates/v/pathmod_derive.svg)](https://crates.io/crates/pathmod_derive)
+[![docs.rs](https://img.shields.io/docsrs/pathmod_derive)](https://docs.rs/pathmod_derive)
+
 Purpose
 - Proc-macro crate providing `#[derive(Accessor)]` for structs (named and tuple).
 - Generates inherent `pub const` accessor methods for each field:
