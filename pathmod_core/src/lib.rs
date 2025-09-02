@@ -1,4 +1,49 @@
-#![doc = "Core types for pathmod\n\nThis crate provides the runtime `Accessor<T, F>` type used by the derive macros in `pathmod_derive` and re-exported by the `pathmod` crate.\n\nClone requirements for set_clone (MVP):\n- `Accessor::set_clone(&mut T, &F)` clones the provided value at the top level and writes it into the focused field.\n- Only `F: Clone` is required. The root type `T` does not need to implement `Clone` for this operation.\n- When composing accessors (e.g., `Accessor<T, U>.compose(Accessor<U, V>)`), calling `set_clone` on the composed accessor still only requires `V: Clone`.\n\nSafety notes:\n- Internally, accessors are represented by a byte offset and use unsafe pointer arithmetic to project fields. The public API is safe when accessors are constructed by the provided derive macros or `from_fns`.\n"]
+#![doc = r#"Pathmod Core — runtime types for composable field accessors
+
+This crate provides the runtime `Accessor<T, F>` type used by the derive macros in
+`pathmod_derive` and re-exported by the `pathmod` crate. An `Accessor<T, F>` is a
+small, `Copy` value that focuses into a field `F` within a root `T`.
+
+Highlights
+- Zero-cost composition: `Accessor` stores a byte offset from `&T` to `&F`; composing
+  accessors is O(1) offset addition.
+- Safe surface: All public APIs are safe. Internals use pointer arithmetic; constructors
+  compute valid offsets for you.
+- Clear clone semantics (MVP): `set_clone` only requires `F: Clone` and does not require
+  `T: Clone`, even when composed deeply.
+
+Quick example
+```rust
+use pathmod_core::Accessor;
+
+#[derive(Debug, PartialEq)]
+struct Bar { x: i32 }
+#[derive(Debug, PartialEq)]
+struct Foo { a: i32, b: Bar }
+
+fn acc_b() -> Accessor<Foo, Bar> {
+    fn get_ref(f: &Foo) -> &Bar { &f.b }
+    fn get_mut(f: &mut Foo) -> &mut Bar { &mut f.b }
+    Accessor::from_fns(get_ref, get_mut)
+}
+fn acc_x() -> Accessor<Bar, i32> {
+    fn get_ref(b: &Bar) -> &i32 { &b.x }
+    fn get_mut(b: &mut Bar) -> &mut i32 { &mut b.x }
+    Accessor::from_fns(get_ref, get_mut)
+}
+
+let mut foo = Foo { a: 1, b: Bar { x: 2 } };
+let acc = acc_b().compose(acc_x());
+acc.set_mut(&mut foo, |v| *v += 5);
+assert_eq!(foo.b.x, 7);
+```
+
+Safety notes
+- Internally, accessors are represented by a byte offset and use unsafe pointer arithmetic
+  to project fields. The public API is safe when accessors are constructed by the provided
+  derive macros or `from_fns`.
+
+"#]
 
 use core::marker::PhantomData;
 
@@ -109,11 +154,37 @@ impl<T, F> Accessor<T, F> {
     }
 }
 
+/// Indexing operations for accessors that focus `Vec<E>`.
+///
+/// Provided as a blanket impl for `Accessor<T, Vec<E>>`.
 pub trait Indexing<T, E> {
+    /// Borrow the element at `idx` immutably.
+    ///
+    /// ```rust
+    /// use pathmod_core::{Accessor, Indexing};
+    /// #[derive(Debug)]
+    /// struct Bag { items: Vec<i32> }
+    /// fn acc_items() -> Accessor<Bag, Vec<i32>> {
+    ///     fn gr(b: &Bag) -> &Vec<i32> { &b.items }
+    ///     fn gm(b: &mut Bag) -> &mut Vec<i32> { &mut b.items }
+    ///     Accessor::from_fns(gr, gm)
+    /// }
+    /// let b = Bag { items: vec![1,2,3] };
+    /// let acc = acc_items();
+    /// assert_eq!(*acc.get_at(&b, 1), 2);
+    /// ```
     fn get_at<'a>(&self, root: &'a T, idx: usize) -> &'a E;
+
+    /// Borrow the element at `idx` mutably.
     fn get_mut_at<'a>(&self, root: &'a mut T, idx: usize) -> &'a mut E;
+
+    /// Set the element at `idx` by moving `value` in.
     fn set_at(&self, root: &mut T, idx: usize, value: E);
+
+    /// Mutate the element at `idx` in-place using the closure.
     fn set_mut_at(&self, root: &mut T, idx: usize, f: impl FnOnce(&mut E));
+
+    /// Set the element at `idx` by cloning from `value`.
     fn set_clone_at(&self, root: &mut T, idx: usize, value: &E)
     where
         E: Clone;

@@ -1,3 +1,48 @@
+//! Derive macros for Pathmod
+//!
+//! This crate provides two derives:
+//! - `#[derive(Accessor)]` for structs (named or tuple), generating const field accessors
+//!   like `acc_<field>()` or `acc_<idx>()`, plus reconstruction helpers `with_*`.
+//! - `#[derive(EnumAccess)]` for enums (MVP: tuple variants with exactly one field),
+//!   generating helpers like `is_<variant>`, `as_<variant>`, `as_<variant>_mut`,
+//!   `set_<variant>`, and `map_<variant>`.
+//!
+//! Most users should depend on the re-export crate `pathmod` and import:
+//! ```rust
+//! use pathmod::prelude::*;
+//! ```
+//!
+//! Example — struct accessors and composition
+//! ```rust
+//! use pathmod::prelude::*;
+//!
+//! #[derive(Accessor, Debug, PartialEq)]
+//! struct Bar { x: i32 }
+//!
+//! #[derive(Accessor, Debug, PartialEq)]
+//! struct Foo { a: i32, b: Bar }
+//!
+//! let mut foo = Foo { a: 1, b: Bar { x: 2 } };
+//! let acc_bx = Foo::acc_b().compose(Bar::acc_x());
+//! acc_bx.set_mut(&mut foo, |v| *v += 5);
+//! assert_eq!(foo.b.x, 7);
+//! ```
+//!
+//! Example — enum helpers (tuple single-field variants)
+//! ```rust
+//! use pathmod::prelude::*;
+//!
+//! #[derive(EnumAccess, Debug, PartialEq)]
+//! enum Msg { Int(i32), Text(String) }
+//!
+//! let mut m = Msg::Int(5);
+//! assert!(m.is_int());
+//! m.map_int(|v| *v += 10);
+//! assert_eq!(m, Msg::Int(15));
+//! m.set_text("hi".to_string());
+//! assert!(m.is_text());
+//! ```
+
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
@@ -95,6 +140,13 @@ fn expand(input: DeriveInput) -> proc_macro2::TokenStream {
     }
 }
 
+/// Derive field accessors for a struct (named or tuple).
+///
+/// Generates, for each field:
+/// - `pub const acc_*() -> pathmod::Accessor<Self, FieldTy>` accessors, and
+/// - `with_*` reconstruction helpers that consume `self` and replace just that field.
+///
+/// See the crate-level docs for usage examples.
 #[proc_macro_derive(Accessor)]
 pub fn accessor_derive(input: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(input as DeriveInput);
@@ -168,6 +220,10 @@ fn expand_enum(input: DeriveInput) -> proc_macro2::TokenStream {
     }
 }
 
+/// Derive helpers for enum variants (MVP: tuple variants with exactly one field).
+///
+/// Generates per-variant helpers: `is_*`, `as_*`, `as_*_mut`, `set_*`, `map_*`.
+/// See crate-level docs for examples and limitations.
 #[proc_macro_derive(EnumAccess)]
 pub fn enum_access_derive(input: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(input as DeriveInput);
