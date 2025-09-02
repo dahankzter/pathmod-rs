@@ -3,13 +3,11 @@ use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Data, DeriveInput, Fields, Ident};
 
-#[proc_macro_derive(Accessor)]
-pub fn accessor_derive(input: TokenStream) -> TokenStream {
-    let input: DeriveInput = parse_macro_input!(input as DeriveInput);
+fn expand(input: DeriveInput) -> proc_macro2::TokenStream {
     let ty_ident = input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
-    let gen = match input.data {
+    match input.data {
         Data::Struct(ref s) => match s.fields {
             Fields::Named(ref fields_named) => {
                 let fns = fields_named.named.iter().map(|f| {
@@ -61,7 +59,56 @@ pub fn accessor_derive(input: TokenStream) -> TokenStream {
             let msg = "#[derive(Accessor)] can only be used on structs";
             quote! { compile_error!(#msg); }
         }
-    };
+    }
+}
 
-    TokenStream::from(gen)
+#[proc_macro_derive(Accessor)]
+pub fn accessor_derive(input: TokenStream) -> TokenStream {
+    let input: DeriveInput = parse_macro_input!(input as DeriveInput);
+    let ts = expand(input);
+    TokenStream::from(ts)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use syn::parse_quote;
+
+    #[test]
+    fn expands_named_struct() {
+        let di: DeriveInput = parse_quote! {
+            struct S { a: i32, b: i64 }
+        };
+        let out = expand(di);
+        let s = out.to_string();
+        assert!(s.contains("acc_a"));
+        assert!(s.contains("acc_b"));
+    }
+
+    #[test]
+    fn expands_tuple_struct() {
+        let di: DeriveInput = parse_quote! {
+            struct P(i32, i64);
+        };
+        let out = expand(di);
+        let s = out.to_string();
+        assert!(s.contains("acc_0"));
+        assert!(s.contains("acc_1"));
+    }
+
+    #[test]
+    fn errors_on_unit_struct() {
+        let di: DeriveInput = parse_quote! { struct U; };
+        let out = expand(di);
+        let s = out.to_string();
+        assert!(s.contains("compile_error") && s.contains("does not support unit structs"));
+    }
+
+    #[test]
+    fn errors_on_enum() {
+        let di: DeriveInput = parse_quote! { enum E { A } };
+        let out = expand(di);
+        let s = out.to_string();
+        assert!(s.contains("compile_error") && s.contains("only be used on structs"));
+    }
 }

@@ -1,0 +1,7 @@
+error: #[derive(Accessor)] does not support unit structs
+ --> tests/ui/unit_struct.rs:4:10
+  |
+4 | #[derive(Accessor)]
+  |          ^^^^^^^^
+  |
+  = note: this error originates in the derive macro `Accessor` (in Nightly builds, run with -Z macro-backtrace for more info)

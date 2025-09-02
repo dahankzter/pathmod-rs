@@ -14,3 +14,7 @@ path = "src/lib.rs"
 proc-macro2 = "1"
 quote = "1"
 syn = { version = "2", features = ["full"] }
+
+[dev-dependencies]
+trybuild = "1"
+pathmod = { path = "../pathmod" }

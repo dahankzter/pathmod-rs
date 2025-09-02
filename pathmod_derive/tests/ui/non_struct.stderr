@@ -1,0 +1,7 @@
+error: #[derive(Accessor)] can only be used on structs
+ --> tests/ui/non_struct.rs:4:10
+  |
+4 | #[derive(Accessor)]
+  |          ^^^^^^^^
+  |
+  = note: this error originates in the derive macro `Accessor` (in Nightly builds, run with -Z macro-backtrace for more info)
