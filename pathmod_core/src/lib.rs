@@ -4,32 +4,61 @@ use core::marker::PhantomData;
 
 /// A small, copyable accessor that focuses into a field F inside a root T.
 ///
-/// This runtime representation carries two function pointers: one for shared
-/// access and one for mutable access. All other operations build on these.
+/// Representation: a byte offset from the start of T to the field F. This
+/// allows cheap composition by offset addition. All operations are implemented
+/// via unsafe pointer arithmetic but expose a safe API.
 #[derive(Debug, Clone, Copy)]
 pub struct Accessor<T, F> {
-    get_ref: fn(&T) -> &F,
-    get_mut: fn(&mut T) -> &mut F,
-    _phantom: PhantomData<(T, F)>,
+    /// Byte offset from a T pointer to its field F.
+    offset: isize,
+    _phantom: PhantomData<fn(T) -> F>,
 }
 
 impl<T, F> Accessor<T, F> {
-    /// Create a new accessor from two functions.
+    /// Construct from a precomputed byte offset.
     ///
-    /// Safety: The provided functions must consistently refer to the same field
-    /// in both shared and mutable forms. They must not alias distinct fields.
-    pub const fn new(get_ref: fn(&T) -> &F, get_mut: fn(&mut T) -> &mut F) -> Self {
-        Self { get_ref, get_mut, _phantom: PhantomData }
+    /// Safety: `offset` must be the correct byte distance from `&T` to `&F`
+    /// within the same allocation for any valid instance of `T`.
+    pub const unsafe fn from_offset(offset: isize) -> Self {
+        Self { offset, _phantom: PhantomData }
+    }
+
+    /// Runtime constructor from field-selection functions. Computes the offset
+    /// using raw pointer projection without dereferencing invalid memory.
+    pub fn from_fns(get_ref: fn(&T) -> &F, _get_mut: fn(&mut T) -> &mut F) -> Self {
+        // Create an arbitrary base pointer; using null is fine since we don't deref.
+        let base = core::ptr::null::<T>();
+        // Obtain the address of the projected field via the provided getter by
+        // transmuting it to a raw-pointer based projection.
+        // We rely on Rust layout and that the getter returns a direct reference
+        // into the same object (a field).
+        unsafe fn to_raw<T, F>(f: fn(&T) -> &F) -> fn(*const T) -> *const F {
+            // Transmute of function pointer types with compatible ABI.
+            core::mem::transmute::<fn(&T) -> &F, fn(*const T) -> *const F>(f)
+        }
+        let raw_get: fn(*const T) -> *const F = unsafe { to_raw(get_ref) };
+        let field_ptr = raw_get(base);
+        let offset = (field_ptr as isize) - (base as isize);
+        // Safety: the offset was computed from a field projection function.
+        unsafe { Accessor::from_offset(offset) }
     }
 
     /// Borrow the focused field immutably.
     pub fn get<'a>(&self, root: &'a T) -> &'a F {
-        (self.get_ref)(root)
+        unsafe {
+            let base = root as *const T as *const u8;
+            let ptr = base.offset(self.offset) as *const F;
+            &*ptr
+        }
     }
 
     /// Borrow the focused field mutably.
     pub fn get_mut<'a>(&self, root: &'a mut T) -> &'a mut F {
-        (self.get_mut)(root)
+        unsafe {
+            let base = root as *mut T as *mut u8;
+            let ptr = base.offset(self.offset) as *mut F;
+            &mut *ptr
+        }
     }
 
     /// Set by moving a new value into the focused location.
@@ -52,6 +81,16 @@ impl<T, F> Accessor<T, F> {
         F: Clone,
     {
         *self.get_mut(root) = value.clone();
+    }
+
+    /// Compose this accessor with another, yielding an accessor from T to V.
+    ///
+    /// Given `self: Accessor<T, U>` and `next: Accessor<U, V>`, returns
+    /// `Accessor<T, V>` that focuses by first going through `self` then `next`.
+    pub fn compose<V>(self, next: Accessor<F, V>) -> Accessor<T, V> {
+        // Offsets add: T -> F, then F -> V.
+        let offset = self.offset + next.offset;
+        unsafe { Accessor::from_offset(offset) }
     }
 }
 
