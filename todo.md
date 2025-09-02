@@ -1,6 +1,6 @@
 # TODO
 
-- Initialize a clean workspace centered on a derive-first design (crates: pathmod_core, pathmod_derive, pathmod re-export).
+- [x] Initialize a clean workspace centered on a derive-first design (crates: pathmod_core, pathmod_derive, pathmod re-export).
 - Implement pathmod_core::Accessor<T, F> runtime with set, set_mut, set_clone, get, get_mut.
 - Implement Accessor::compose to chain Accessor<T, U> -> Accessor<U, V> into Accessor<T, V>.
 - Implement #[derive(Accessor)] for named-field structs, generating pub const acc_<field>() -> Accessor<Self, FieldTy>.

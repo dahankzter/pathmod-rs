@@ -1,0 +1,14 @@
+[package]
+name = "pathmod"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Re-export crate for pathmod"
+repository = ""
+
+[dependencies]
+pathmod_core = { path = "../pathmod_core" }
+pathmod_derive = { path = "../pathmod_derive" }
+
+[lib]
+path = "src/lib.rs"

@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "pathmod_core",
+    "pathmod_derive",
+    "pathmod",
+]
+resolver = "2"
