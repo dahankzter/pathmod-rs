@@ -16,10 +16,10 @@ fn expand(input: DeriveInput) -> proc_macro2::TokenStream {
                     let fty = &f.ty;
                     quote! {
                         /// Accessor to the `#fname` field.
-                        pub const fn #acc_fn() -> pathmod_core::Accessor<#ty_ident #ty_generics, #fty> {
+                        pub const fn #acc_fn() -> pathmod::Accessor<#ty_ident #ty_generics, #fty> {
                             let off = core::mem::offset_of!(#ty_ident #ty_generics, #fname) as isize;
                             // SAFETY: `off` is computed from the field offset within the same allocation.
-                            unsafe { pathmod_core::Accessor::<#ty_ident #ty_generics, #fty>::from_offset(off) }
+                            unsafe { pathmod::Accessor::<#ty_ident #ty_generics, #fty>::from_offset(off) }
                         }
                     }
                 });
@@ -37,10 +37,10 @@ fn expand(input: DeriveInput) -> proc_macro2::TokenStream {
                     let index = syn::Index::from(i);
                     quote! {
                         /// Accessor to the tuple field at index #i.
-                        pub const fn #acc_fn() -> pathmod_core::Accessor<#ty_ident #ty_generics, #fty> {
+                        pub const fn #acc_fn() -> pathmod::Accessor<#ty_ident #ty_generics, #fty> {
                             let off = core::mem::offset_of!(#ty_ident #ty_generics, #index) as isize;
                             // SAFETY: `off` is computed from the field offset within the same allocation.
-                            unsafe { pathmod_core::Accessor::<#ty_ident #ty_generics, #fty>::from_offset(off) }
+                            unsafe { pathmod::Accessor::<#ty_ident #ty_generics, #fty>::from_offset(off) }
                         }
                     }
                 });

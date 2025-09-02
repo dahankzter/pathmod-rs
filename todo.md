@@ -7,7 +7,7 @@
 - [x] Implement #[derive(Accessor)] for tuple structs, generating pub const acc_<index>() -> Accessor<Self, FieldTy>.
 - [x] Generate set_clone using top-level clone (MVP) and document Clone requirements on root type.
 - [x] Add unit tests covering get/get_mut/set/set_mut/set_clone and composed deep updates.
-- Add trybuild UI tests for invalid derives (non-struct targets), generics bounds, and visibility diagnostics.
+- [x] Add trybuild UI tests for invalid derives (non-struct targets), generics bounds, and visibility diagnostics.
 - Add an example demonstrating derive-based deep mutation via composed accessors.
 - Update README to present the derive-centric API, composition, and visibility rules.
 - Set up CI (fmt, clippy -D warnings, tests including doctests) and enforce/document MSRV 1.89+.

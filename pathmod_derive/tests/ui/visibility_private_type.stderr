@@ -1,0 +1,11 @@
+error[E0603]: struct `Private` is private
+  --> tests/ui/visibility_private_type.rs:19:16
+   |
+19 |     let _ = m::Private::acc_field();
+   |                ^^^^^^^ private struct
+   |
+note: the struct `Private` is defined here
+  --> tests/ui/visibility_private_type.rs:4:5
+   |
+4  |     struct Private {
+   |     ^^^^^^^^^^^^^^

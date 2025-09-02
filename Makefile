@@ -10,7 +10,14 @@ COV_DIR := target/llvm-cov
 HTML_INDEX := $(COV_DIR)/html/index.html
 LCOV_FILE := $(COV_DIR)/lcov.info
 
-.PHONY: coverage coverage-html coverage-lcov coverage-summary coverage-clean coverage-open ensure-llvm-tools ensure-llvm-cov
+.PHONY: clean test tests coverage coverage-html coverage-lcov coverage-summary coverage-clean coverage-open ensure-llvm-tools ensure-llvm-cov
+
+# Run all tests across the workspace, including trybuild UI tests (proc-macro crate)
+# --all-targets includes unit, integration, and doctests.
+# Ensure a clean build before running tests
+test tests: clean
+	$(CARGO) test --workspace --all-features --all-targets
+	@echo "All tests completed (trybuild UI tests are run via pathmod_derive's test harness)."
 
 # Main coverage target: text summary and HTML report
 coverage: ensure-llvm-tools ensure-llvm-cov
@@ -35,6 +42,11 @@ coverage-lcov: ensure-llvm-tools ensure-llvm-cov
 # Remove coverage artifacts
 coverage-clean:
 	@rm -rf $(COV_DIR)
+
+# Clean the workspace (cargo clean) and coverage artifacts
+clean:
+	$(CARGO) clean
+	@$(MAKE) coverage-clean
 
 # Try to open the HTML report in a browser (macOS or Linux)
 coverage-open:
