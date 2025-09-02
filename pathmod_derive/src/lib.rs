@@ -19,8 +19,6 @@ pub fn accessor_derive(input: TokenStream) -> TokenStream {
                     quote! {
                         /// Accessor to the `#fname` field.
                         pub const fn #acc_fn() -> pathmod_core::Accessor<#ty_ident #ty_generics, #fty> {
-                            // Compute offset using a null pointer projection in a const-friendly way.
-                            // Note: using pointer arithmetic without dereferencing.
                             let off = core::mem::offset_of!(#ty_ident #ty_generics, #fname) as isize;
                             // SAFETY: `off` is computed from the field offset within the same allocation.
                             unsafe { pathmod_core::Accessor::<#ty_ident #ty_generics, #fty>::from_offset(off) }
@@ -34,8 +32,28 @@ pub fn accessor_derive(input: TokenStream) -> TokenStream {
                     }
                 }
             }
-            _ => {
-                let msg = "#[derive(Accessor)] currently supports only named-field structs";
+            Fields::Unnamed(ref fields_unnamed) => {
+                let fns = fields_unnamed.unnamed.iter().enumerate().map(|(i, f)| {
+                    let acc_fn = format_ident!("acc_{}", i);
+                    let fty = &f.ty;
+                    let index = syn::Index::from(i);
+                    quote! {
+                        /// Accessor to the tuple field at index #i.
+                        pub const fn #acc_fn() -> pathmod_core::Accessor<#ty_ident #ty_generics, #fty> {
+                            let off = core::mem::offset_of!(#ty_ident #ty_generics, #index) as isize;
+                            // SAFETY: `off` is computed from the field offset within the same allocation.
+                            unsafe { pathmod_core::Accessor::<#ty_ident #ty_generics, #fty>::from_offset(off) }
+                        }
+                    }
+                });
+                quote! {
+                    impl #impl_generics #ty_ident #ty_generics #where_clause {
+                        #(#fns)*
+                    }
+                }
+            }
+            Fields::Unit => {
+                let msg = "#[derive(Accessor)] does not support unit structs";
                 quote! { compile_error!(#msg); }
             }
         },
