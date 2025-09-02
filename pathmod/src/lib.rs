@@ -12,19 +12,17 @@
 //! #[derive(Accessor, Debug, PartialEq)]
 //! struct Foo { a: i32, b: Bar }
 //!
-//! fn main() {
-//!     let mut foo = Foo { a: 1, b: Bar { x: 2 } };
-//!     // Access direct field
-//!     let acc_a = Foo::acc_a();
-//!     assert_eq!(*acc_a.get(&foo), 1);
-//!     acc_a.set(&mut foo, 10);
-//!     assert_eq!(foo.a, 10);
+//! let mut foo = Foo { a: 1, b: Bar { x: 2 } };
+//! // Access direct field
+//! let acc_a = Foo::acc_a();
+//! assert_eq!(*acc_a.get(&foo), 1);
+//! acc_a.set(&mut foo, 10);
+//! assert_eq!(foo.a, 10);
 //!
-//!     // Compose to reach nested leaf Foo -> Bar -> x
-//!     let acc_bx = Foo::acc_b().compose(Bar::acc_x());
-//!     acc_bx.set_mut(&mut foo, |v| *v += 5);
-//!     assert_eq!(foo.b.x, 7);
-//! }
+//! // Compose to reach nested leaf Foo -> Bar -> x
+//! let acc_bx = Foo::acc_b().compose(Bar::acc_x());
+//! acc_bx.set_mut(&mut foo, |v| *v += 5);
+//! assert_eq!(foo.b.x, 7);
 //! ```
 //!
 //! See also:
