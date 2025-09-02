@@ -10,7 +10,7 @@ COV_DIR := target/llvm-cov
 HTML_INDEX := $(COV_DIR)/html/index.html
 LCOV_FILE := $(COV_DIR)/lcov.info
 
-.PHONY: clean test tests format format-check coverage coverage-html coverage-lcov coverage-summary coverage-clean coverage-open ensure-llvm-tools ensure-llvm-cov
+.PHONY: clean test tests format format-check release coverage coverage-html coverage-lcov coverage-summary coverage-clean coverage-open ensure-llvm-tools ensure-llvm-cov
 
 # Run all tests across the workspace, including trybuild UI tests (proc-macro crate)
 # --all-targets includes unit, integration, and doctests.
@@ -49,6 +49,31 @@ format:
 
 format-check:
 	$(CARGO) fmt --all -- --check
+
+# Release: create a signed tag vX.Y.Z and push it (no version bumping here)
+# Usage: make release VERSION=X.Y.Z
+release:
+	@if [ -z "$(VERSION)" ]; then \
+	  echo "Usage: make release VERSION=X.Y.Z"; exit 1; \
+	fi
+	@# Ensure working tree is clean
+	@if ! git diff --quiet || ! git diff --cached --quiet; then \
+	  echo "Working tree is dirty. Commit or stash changes before releasing."; exit 1; \
+	fi
+	@# Ensure tag does not already exist
+	@if git rev-parse -q --verify "refs/tags/v$(VERSION)" >/dev/null; then \
+	  echo "Tag v$(VERSION) already exists locally."; exit 1; \
+	fi
+	@# Ensure remote tag does not exist
+	@if git ls-remote --tags origin "refs/tags/v$(VERSION)" | grep -q .; then \
+	  echo "Tag v$(VERSION) already exists on origin."; exit 1; \
+	fi
+	@# Create signed annotated tag
+	git tag -s v$(VERSION) -m 'pathmod-rs v$(VERSION)'
+	@# Push current branch (if any new commits) and tag to origin
+	git push
+	git push origin v$(VERSION)
+	@echo "Created and pushed tag v$(VERSION). CI will publish to crates.io."
 
 # Clean the workspace (cargo clean) and coverage artifacts
 clean:

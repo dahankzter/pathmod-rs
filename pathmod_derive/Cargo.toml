@@ -4,7 +4,12 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Derive macros for pathmod"
-repository = ""
+repository = "https://github.com/dahankzter/pathmod-rs"
+readme = "README.md"
+homepage = "https://github.com/dahankzter/pathmod-rs"
+documentation = "https://docs.rs/pathmod_derive"
+keywords = ["macro", "derive", "accessor", "lens"]
+categories = ["development-tools"]
 
 [lib]
 proc-macro = true

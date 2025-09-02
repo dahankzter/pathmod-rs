@@ -1,0 +1,40 @@
+# cargo-release configuration for the workspace
+# We drive the release from a git tag vX.Y.Z. CI invokes `cargo release X.Y.Z`
+# with flags to avoid tagging/pushing (tag already exists) and to publish.
+
+# Apply settings to the whole workspace
+workspace = true
+
+# Keep a single version across crates. cargo-release will bump all package
+# versions to the same X.Y.Z during the CI job, commit the changes (in CI),
+# and publish in dependency order.
+shared-version = true
+
+# We don’t want cargo-release to create tags or push in CI because the tag
+# already exists and triggered the workflow.
+# These are also enforced by CLI flags in the workflow (--no-tag --no-push),
+# but duplicated here for clarity.
+disable-tag = true
+push-remote = false
+
+# Pre-release checks: format, clippy (deny warnings), and tests.
+# Hooks are run from the workspace root in the CI job.
+pre-release-replacements = []
+
+# Define hooks using the newer hooks table (supported by cargo-release >= 0.24)
+# If your installed cargo-release is older, the workflow simply runs these
+# commands before invoking cargo-release.
+
+[hooks]
+pre-release = [
+  { command = "cargo", args = ["fmt", "--all", "--", "--check"] },
+  { command = "cargo", args = ["clippy", "--workspace", "--all-targets", "--all-features", "--", "-D", "warnings"] },
+  { command = "cargo", args = ["test", "--workspace", "--all-features", "--all-targets"] },
+]
+
+# When publishing, cargo-release will use `cargo publish` under the hood.
+# crates.io token is provided via CARGO_REGISTRY_TOKEN env var in CI.
+
+# Customize the tag name pattern to match our trigger (vX.Y.Z) if cargo-release
+# is ever run locally with tagging enabled.
+tag-name = "v{{version}}"

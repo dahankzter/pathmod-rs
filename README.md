@@ -19,9 +19,9 @@ Rust encourages explicit ownership and borrowing, but it can be verbose to tunne
 - Clear semantics for cloning: set_clone clones only the target field value (MVP). The root type does not need Clone.
 
 Crates in this workspace
-- pathmod: Re-export crate; depend on this in your projects.
-- pathmod_core: Core Accessor runtime (offset-based, safe API).
-- pathmod_derive: Proc-macro derive that generates const accessors using core::mem::offset_of!.
+- pathmod: Re-export crate; depend on this in your projects. Crates.io: https://crates.io/crates/pathmod
+- pathmod_core: Core Accessor runtime (offset-based, safe API). Crates.io: https://crates.io/crates/pathmod_core
+- pathmod_derive: Proc-macro derive that generates const accessors using core::mem::offset_of!. Crates.io: https://crates.io/crates/pathmod_derive
 
 Minimum Supported Rust Version (MSRV)
 - MSRV: 1.89+ (required by core::mem::offset_of!). CI enforces building, linting, and testing on Rust 1.89.0 and stable.
@@ -197,6 +197,16 @@ Development
 - Coverage:
   - make coverage-summary  # prints text summary for all crates
   - make coverage          # generates HTML at target/llvm-cov/html/index.html
+
+Single-version policy and Release (tag-based, crates.io)
+- All crates in this workspace share a single version number that corresponds to the git tag (vX.Y.Z).
+- Tag-only flow (no local version bumping required):
+  1) Ensure the repository secret CRATES_IO_TOKEN is set in GitHub (from your crates.io account).
+  2) Create and push a tag vX.Y.Z (e.g., git tag v0.1.0 && git push origin v0.1.0).
+  3) The Release workflow runs cargo-release, which sets all crate versions to X.Y.Z in CI and publishes in order: pathmod_derive -> pathmod_core -> pathmod.
+- Notes:
+  - Local Cargo.toml versions can be placeholders; CI updates them from the tag during the release job.
+  - If you prefer manual bumps, the Makefile still provides: make set-version v=X.Y.Z (optional).
 
 Note about what appears in the coverage summary
 - The terminal table lists files that have executable coverage regions. Our pathmod crate is a thin re-export crate; its src/lib.rs only re-exports items, so it typically has 0 instrumentable lines and may not appear in the table.
