@@ -1,0 +1,7 @@
+error: #[derive(EnumAccess)] supports only tuple variants with exactly one field
+ --> tests/ui/enum_multi.rs:3:10
+  |
+3 | #[derive(EnumAccess)]
+  |          ^^^^^^^^^^
+  |
+  = note: this error originates in the derive macro `EnumAccess` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -9,4 +9,10 @@ fn derive_errors() {
     t.compile_fail("tests/ui/visibility_private_type.rs");
     // Generics positive case: should compile
     t.pass("tests/ui/generic_ok.rs");
+
+    // EnumAccess derive negative cases
+    t.compile_fail("tests/ui/enum_non_enum.rs");
+    t.compile_fail("tests/ui/enum_unit.rs");
+    t.compile_fail("tests/ui/enum_multi.rs");
+    t.compile_fail("tests/ui/enum_named_single.rs");
 }

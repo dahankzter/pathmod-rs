@@ -13,4 +13,4 @@
 - [x] Set up CI (fmt, clippy -D warnings, tests including doctests) and enforce/document MSRV 1.89+.
 - [x] Roadmap: implement minimal-clone reconstruction along the path with precise Clone bounds.
 - [x] Roadmap: add indexing builders (e.g., acc_items_at(idx) -> Accessor<Self, Item>) for Vec/arrays.
-- Roadmap: add #[derive(EnumAccess)] for ergonomic enum variant setters/getters.
+- [x] Roadmap: add #[derive(EnumAccess)] for ergonomic enum variant setters/getters.
